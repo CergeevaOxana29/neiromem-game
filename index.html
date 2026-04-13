@@ -314,7 +314,7 @@
         <p style="text-align:center; font-size:1.1rem">Как играть? Прочитай внимательно!</p>
         
         <h3>🎯 Цель игры</h3>
-        <p>Найти все пары: карточка с <strong>транскрипцией</strong> [з'им'а] + карточка со <strong>словом</strong> ЗИМА.</p>
+        <p>Найти все пары: карточка с <strong>транскрипцией</strong> [з'има] + карточка со <strong>словом</strong> ЗИМА.</p>
         
         <h3>🎲 Правила</h3>
         <ul>
@@ -377,29 +377,24 @@
     // ==================== МУЗЫКА ИЗ ФАЙЛА ====================
     let musicEnabled = true;
     let sfxEnabled = true;
-    let bgMusic = null;         // аудиообъект
-    let audioCtx = null;        // для звуковых эффектов
+    let bgMusic = null;
+    let audioCtx = null;
     let audioInitialized = false;
 
-    // Инициализация Web Audio (только для звуковых эффектов)
     function initAudio() {
         if (audioInitialized) return;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         audioInitialized = true;
     }
 
-    // Фоновая музыка из внешнего файла (зациклена)
     function startBackgroundMusic() {
         if (!musicEnabled) return;
         if (!bgMusic) {
-            // ⭐⭐⭐ ВАЖНО: УКАЖИТЕ ИМЯ ВАШЕГО ФАЙЛА ЗДЕСЬ ⭐⭐⭐
-            bgMusic = new Audio('bg_music.mp3');  // ← ИМЯ ФАЙЛА
+            bgMusic = new Audio('bg_music.mp3');
             bgMusic.loop = true;
-            bgMusic.volume = 0.2;  // тихо, не напрягает
+            bgMusic.volume = 0.2;
         }
-        // Автовоспроизведение может быть заблокировано браузером,
-        // но после клика по "Начать игру!" оно сработает
-        bgMusic.play().catch(e => console.log("Автовоспроизведение музыки заблокировано, но после клика заработает"));
+        bgMusic.play().catch(e => console.log("Автовоспроизведение музыки заблокировано"));
     }
 
     function stopBackgroundMusic() {
@@ -409,7 +404,6 @@
         }
     }
 
-    // Звуковые эффекты (Web Audio)
     function playFlipSound() {
         if (!sfxEnabled || !audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -501,16 +495,16 @@
         });
     }
 
-    // ==================== ИГРОВАЯ ЛОГИКА ====================
+    // ==================== ИСПРАВЛЕННЫЕ ДАННЫЕ ПАР ====================
     const PAIRS_DATA = [
-        { trans: "[з'им'а]", word: "ЗИМА", bonusQuestion: "Какое слово поможет проверить безударную И в слове ЗИМА?", bonusOptions: ["зима", "зИмы", "зимний"], correct: 1 },
+        { trans: "[з'има]", word: "ЗИМА", bonusQuestion: "Какое слово поможет проверить безударную И в слове ЗИМА?", bonusOptions: ["зима", "зИмы", "зимний"], correct: 1 },
         { trans: "[маркоф']", word: "МОРКОВЬ", bonusQuestion: "Какая буква пропущена в слове М_РКОВЬ?", bonusOptions: ["А", "О", "Е"], correct: 1 },
-        { trans: "[пралажыт']", word: "ПОЛОЖИТЬ", bonusQuestion: "В корне -лож- пишется буква:", bonusOptions: ["А", "О", "И"], correct: 1 },
-        { trans: "[с'эрацэ]", word: "СЕРДЦЕ", bonusQuestion: "Какая буква в слове СЕРДЦЕ не произносится?", bonusOptions: ["С", "Р", "Д"], correct: 2 },
+        { trans: "[палажыт']", word: "ПОЛОЖИТЬ", bonusQuestion: "В корне -лож- пишется буква:", bonusOptions: ["А", "О", "И"], correct: 1 },
+        { trans: "[с'эрцэ]", word: "СЕРДЦЕ", bonusQuestion: "Какая буква в слове СЕРДЦЕ не произносится?", bonusOptions: ["С", "Р", "Д"], correct: 2 },
         { trans: "[зуп]", word: "ЗУБ", bonusQuestion: "Как правильно проверить букву Б в слове ЗУБ?", bonusOptions: ["зубы", "зубной", "зубик"], correct: 0 },
-        { trans: "[й'аблака]", word: "ЯБЛОКА", bonusQuestion: "Сколько звуков в слове ЯБЛОКА?", bonusOptions: ["5", "6", "7"], correct: 2 },
+        { trans: "[й'аблака]", word: "ЯБЛОКО", bonusQuestion: "Сколько звуков в слове ЯБЛОКО?", bonusOptions: ["5", "6", "7"], correct: 2 },
         { trans: "[раскас]", word: "РАССКАЗ", bonusQuestion: "В слове РАССКАЗ приставка пишется:", bonusOptions: ["РАЗ-", "РАС-", "РА-"], correct: 1 },
-        { trans: "[пишыш]", word: "ПИШИШЬ", bonusQuestion: "В слове ПИШЕШЬ мягкий знак:", bonusOptions: ["нужен", "не нужен"], correct: 0 },
+        { trans: "[пишэш]", word: "ПИШЕШЬ", bonusQuestion: "В слове ПИШЕШЬ мягкий знак:", bonusOptions: ["нужен", "не нужен"], correct: 0 },
         { trans: "[цыган]", word: "ЦЫГАН", bonusQuestion: "После Ц в слове Ц_ГАН пишется буква:", bonusOptions: ["И", "Ы", "Е"], correct: 1 },
         { trans: "[абй'экт]", word: "ОБЪЕКТ", bonusQuestion: "В слове ОБ_ЕКТ пишется:", bonusOptions: ["Ъ", "Ь"], correct: 0 }
     ];
@@ -686,7 +680,6 @@
         if (musicEnabled) startBackgroundMusic();
     }
 
-    // ЗАПУСК ПОСЛЕ ЗАКРЫТИЯ ИНСТРУКЦИИ
     document.getElementById("startGameBtn").onclick = () => {
         document.getElementById("instructionModal").style.display = "none";
         document.getElementById("gameContainer").style.display = "block";

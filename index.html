@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>НейроМем: Звук и Буква — с музыкой из файла</title>
+    <title>НейроМем: Звук и Буква — исправленная версия</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,7 +21,6 @@
             padding: 20px;
         }
 
-        /* Модальное окно инструкции */
         .modal {
             position: fixed;
             top: 0;
@@ -33,7 +32,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            font-family: 'Segoe UI', sans-serif;
         }
 
         .modal-content {
@@ -44,7 +42,6 @@
             overflow-y: auto;
             border-radius: 40px;
             padding: 25px 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             animation: fadeIn 0.3s ease;
         }
 
@@ -53,253 +50,49 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .modal-content h2 {
-            color: #1e3c72;
-            text-align: center;
-            margin-top: 0;
-        }
+        .modal-content h2 { color: #1e3c72; text-align: center; margin-top: 0; }
+        .modal-content h3 { color: #2c5282; margin-top: 20px; }
+        .instruction-bonus { background: #e9ecef; border-radius: 20px; padding: 10px 15px; margin: 10px 0; }
+        .btn-start { background: #facc15; color: #1e293b; border: none; padding: 14px 28px; border-radius: 60px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 25px; }
 
-        .modal-content h3 {
-            color: #2c5282;
-            margin-top: 20px;
-        }
+        .game-container { max-width: 1300px; width: 100%; background: rgba(255,255,255,0.1); border-radius: 56px; padding: 20px; backdrop-filter: blur(3px); }
+        .game-panel { background: #fef9e8; border-radius: 40px; padding: 20px 24px; box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
 
-        .instruction-bonus {
-            background: #e9ecef;
-            border-radius: 20px;
-            padding: 10px 15px;
-            margin: 10px 0;
-        }
+        h1 { text-align: center; font-size: 1.9rem; margin: 0 0 6px 0; color: #1e3c72; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        h1 span { background: #ffd966; padding: 5px 18px; border-radius: 60px; font-size: 1rem; color: #2d3748; }
+        .sub { text-align: center; color: #2c5282; margin-bottom: 22px; font-style: italic; }
 
-        .btn-start {
-            background: #facc15;
-            color: #1e293b;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 60px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 25px;
-        }
+        .mode-controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
+        .mode-btn { background: #4a5568; color: white; border: none; padding: 6px 20px; border-radius: 40px; font-size: 0.9rem; cursor: pointer; }
+        .mode-btn.active { background: #2c5282; box-shadow: 0 0 0 2px #facc15; }
+        .audio-controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
+        .audio-btn { background: #2c5282; color: white; border: none; padding: 6px 16px; border-radius: 40px; font-size: 0.9rem; cursor: pointer; }
 
-        .game-container {
-            max-width: 1300px;
-            width: 100%;
-            background: rgba(255,255,255,0.1);
-            border-radius: 56px;
-            padding: 20px;
-            backdrop-filter: blur(3px);
-        }
+        .stats { display: flex; justify-content: space-between; background: #e2e8f0; padding: 12px 20px; border-radius: 60px; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .score-box, .turn-box, .message-box { background: white; padding: 6px 20px; border-radius: 40px; font-weight: bold; }
+        .turn-box { background: #2c5282; color: white; }
+        .message-box { background: #fffbeb; color: #b45309; flex-grow: 1; text-align: center; }
 
-        .game-panel {
-            background: #fef9e8;
-            border-radius: 40px;
-            padding: 20px 24px;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
-        }
+        .cards-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 25px; }
+        .card { aspect-ratio: 4 / 3; background: #facc15; background-image: radial-gradient(circle at 25% 35%, rgba(255,215,0,0.8) 2.5%, transparent 2.5%); background-size: 18px 18px; border-radius: 20px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 8px 0 #b45309; color: #1a202c; padding: 12px 8px; word-break: break-word; transform: translateY(-2px); font-family: 'Courier New', monospace; }
+        .card.flipped { background: #ffffff; background-image: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(0px); cursor: default; border: 2px solid #2b6cb0; font-size: 1.4rem; font-weight: 800; }
+        .card.matched { visibility: hidden; pointer-events: none; opacity: 0; transform: scale(0.85); transition: visibility 0.2s, opacity 0.2s; }
+        .card:active:not(.flipped):not(.matched) { transform: translateY(4px); box-shadow: 0 4px 0 #b45309; }
 
-        h1 {
-            text-align: center;
-            font-size: 1.9rem;
-            margin: 0 0 6px 0;
-            color: #1e3c72;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        h1 span {
-            background: #ffd966;
-            padding: 5px 18px;
-            border-radius: 60px;
-            font-size: 1rem;
-            color: #2d3748;
-        }
-
-        .sub {
-            text-align: center;
-            color: #2c5282;
-            margin-bottom: 22px;
-            font-style: italic;
-        }
-
-        .audio-controls {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .audio-btn {
-            background: #2c5282;
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            background: #e2e8f0;
-            padding: 12px 20px;
-            border-radius: 60px;
-            margin-bottom: 25px;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .score-box, .turn-box, .message-box {
-            background: white;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-        }
-
-        .turn-box {
-            background: #2c5282;
-            color: white;
-        }
-
-        .message-box {
-            background: #fffbeb;
-            color: #b45309;
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            aspect-ratio: 4 / 3;
-            background: #facc15;
-            background-image: radial-gradient(circle at 25% 35%, rgba(255,215,0,0.8) 2.5%, transparent 2.5%);
-            background-size: 18px 18px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 8px 0 #b45309;
-            color: #1a202c;
-            padding: 12px 8px;
-            word-break: break-word;
-            transform: translateY(-2px);
-            font-family: 'Courier New', monospace;
-        }
-
-        .card.flipped {
-            background: #ffffff;
-            background-image: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(0px);
-            cursor: default;
-            border: 2px solid #2b6cb0;
-            font-size: 1.4rem;
-            font-weight: 800;
-        }
-
-        .card.matched {
-            visibility: hidden;
-            pointer-events: none;
-            opacity: 0;
-            transform: scale(0.85);
-            transition: visibility 0.2s, opacity 0.2s;
-        }
-
-        .neuro-bonus-area {
-            background: #e9ecef;
-            border-radius: 32px;
-            padding: 18px 20px;
-            margin: 15px 0 10px;
-            text-align: center;
-            border-left: 8px solid #facc15;
-        }
-
-        .bonus-card {
-            background: #1e293b;
-            color: white;
-            padding: 18px;
-            border-radius: 28px;
-            max-width: 550px;
-            margin: 0 auto;
-        }
-
-        .bonus-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-
-        .bonus-question {
-            font-size: 1.1rem;
-            margin: 12px 0;
-        }
-
-        .bonus-options {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 15px 0;
-        }
-
-        .bonus-option {
-            background: #334155;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 48px;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            color: white;
-        }
-
-        .btn-reset {
-            background: #2c5282;
-            color: white;
-            margin-top: 12px;
-            width: 100%;
-            padding: 14px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 48px;
-            cursor: pointer;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        footer {
-            text-align: center;
-            font-size: 0.7rem;
-            margin-top: 18px;
-            color: #fef9e8;
-        }
+        .neuro-bonus-area { background: #e9ecef; border-radius: 32px; padding: 18px 20px; margin: 15px 0 10px; text-align: center; border-left: 8px solid #facc15; }
+        .bonus-card { background: #1e293b; color: white; padding: 18px; border-radius: 28px; max-width: 550px; margin: 0 auto; }
+        .bonus-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 12px; }
+        .bonus-question { font-size: 1.1rem; margin: 12px 0; line-height: 1.4; }
+        .bonus-options { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 15px 0; }
+        .bonus-option { background: #334155; border: none; padding: 10px 20px; border-radius: 48px; font-weight: bold; font-size: 1rem; cursor: pointer; color: white; transition: 0.1s; }
+        .bonus-option:hover { background: #facc15; color: #1e293b; }
+        .btn-reset { background: #2c5282; color: white; margin-top: 12px; width: 100%; padding: 14px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 48px; cursor: pointer; }
+        .hidden { display: none; }
+        footer { text-align: center; font-size: 0.7rem; margin-top: 18px; color: #fef9e8; }
+        .game-over-message { text-align: center; font-size: 1.3rem; font-weight: bold; color: #2c5282; margin-top: 15px; padding: 10px; background: #e2e8f0; border-radius: 40px; }
 
         @media (max-width: 700px) {
-            .cards-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 12px;
-            }
+            .cards-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
             .card { font-size: 1rem; }
             .card.flipped { font-size: 1.1rem; }
         }
@@ -307,45 +100,38 @@
 </head>
 <body>
 
-<!-- ИНСТРУКЦИЯ ПЕРЕД ЗАПУСКОМ -->
 <div id="instructionModal" class="modal">
     <div class="modal-content">
         <h2>🧠 НейроМем: Звук и Буква</h2>
         <p style="text-align:center; font-size:1.1rem">Как играть? Прочитай внимательно!</p>
-        
         <h3>🎯 Цель игры</h3>
-        <p>Найти все пары: карточка с <strong>транскрипцией</strong> [з'има] + карточка со <strong>словом</strong> ЗИМА.</p>
-        
+        <p>Найти все пары: карточка с <strong>транскрипцией</strong> + карточка со <strong>словом</strong>.</p>
         <h3>🎲 Правила</h3>
         <ul>
-            <li>Играют <strong>2 игрока</strong> (или вы против учителя/друга).</li>
-            <li>Ходите по очереди: открывайте <strong>2 карточки</strong> за ход.</li>
+            <li><strong>Режим 2 игрока:</strong> ходите по очереди с другом.</li>
+            <li><strong>Режим 1 игрок:</strong> играйте против компьютера (компьютер ходит случайно).</li>
+            <li>Открывайте <strong>2 карточки</strong> за ход.</li>
             <li>Если карточки <strong>не пара</strong> — они закроются, ход перейдёт сопернику.</li>
-            <li>Если <strong>нашли пару</strong> — появится <strong>нейро-бонус</strong> (вопрос по орфографии).</li>
+            <li>Если <strong>нашли пару</strong> — появится вопрос. Ответьте правильно, чтобы забрать пару и получить дополнительный ход!</li>
         </ul>
-        
         <div class="instruction-bonus">
-            <strong>🎓 Нейро-бонус (обязателен!)</strong><br>
-            • Выбери правильный ответ из вариантов.<br>
-            • <span style="color:#2b6cb0">✅ Ответил верно</span> → забираешь пару, получаешь +1 очко и <strong>ходишь ещё раз</strong>.<br>
-            • <span style="color:#b45309">❌ Ошибся</span> → пара закрывается, очко не даётся, ход переходит другому.
+            <strong>🎓 Нейро-бонус</strong><br>
+            ✅ Верно → +1 очко, пара исчезает, <strong>ходишь ещё раз</strong>.<br>
+            ❌ Ошибка → пара закрывается, ход переходит.
         </div>
-        
-        <h3>🔊 Звуки и музыка</h3>
-        <ul>
-            <li>🎵 Играет <strong>фоновая музыка из файла bg_music.mp3</strong> (зациклена, тихо).</li>
-            <li>🔊 Есть звуки: переворот карточки, правильный/неправильный ответ, победа.</li>
-            <li>Кнопки управления звуком — вверху экрана.</li>
-        </ul>
-        
         <button class="btn-start" id="startGameBtn">🚀 Начать игру!</button>
     </div>
 </div>
 
 <div class="game-container" style="display: none;" id="gameContainer">
     <div class="game-panel">
-        <h1>🧠 НейроМем: Звук и Буква <span>фоновая музыка</span></h1>
+        <h1>🧠 НейроМем: Звук и Буква <span>исправленная версия</span></h1>
         <div class="sub">🎯 найди пару [транскрипция] → БУКВЫ + ответь на вопрос!</div>
+
+        <div class="mode-controls">
+            <button class="mode-btn" id="mode2pBtn">👥 2 игрока</button>
+            <button class="mode-btn" id="mode1pBtn">🎮 1 игрок (vs Компьютер)</button>
+        </div>
 
         <div class="audio-controls">
             <button class="audio-btn" id="toggleMusicBtn">🎵 Музыка: Вкл</button>
@@ -355,7 +141,7 @@
         <div class="stats">
             <div class="score-box">🏆 Счёт: <span id="scoreValue">0 : 0</span></div>
             <div class="turn-box">🎲 Ход: <span id="turnPlayer">Игрок 1</span></div>
-            <div class="message-box" id="messageBox">💡 Открывай карточки</div>
+            <div class="message-box" id="messageBox">🎮 Новая игра! Начинает Игрок 1</div>
         </div>
 
         <div class="cards-grid" id="cardsGrid"></div>
@@ -369,12 +155,17 @@
         </div>
 
         <button class="btn-reset" id="resetGame">🔄 Новая игра</button>
+        <div id="gameOverMessage" class="game-over-message hidden"></div>
     </div>
     <footer>🧠 Нейропсихологический подход — отвечай на вопросы, тренируй внимание и грамотность!</footer>
 </div>
 
 <script>
-    // ==================== МУЗЫКА ИЗ ФАЙЛА ====================
+    // Режим игры: true = 2 игрока, false = 1 игрок (против компа)
+    let isTwoPlayerMode = true;
+    let computerTimeout = null;
+
+    // ==================== МУЗЫКА И ЗВУКИ ====================
     let musicEnabled = true;
     let sfxEnabled = true;
     let bgMusic = null;
@@ -394,20 +185,16 @@
             bgMusic.loop = true;
             bgMusic.volume = 0.2;
         }
-        bgMusic.play().catch(e => console.log("Автовоспроизведение музыки заблокировано"));
+        bgMusic.play().catch(e => console.log("Музыка заблокирована"));
     }
 
     function stopBackgroundMusic() {
-        if (bgMusic) {
-            bgMusic.pause();
-            bgMusic.currentTime = 0;
-        }
+        if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
     }
 
     function playFlipSound() {
         if (!sfxEnabled || !audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -416,8 +203,8 @@
         osc.type = 'sine';
         gain.gain.value = 0.1;
         osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.08);
-        osc.stop(now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.08);
+        osc.stop(audioCtx.currentTime + 0.08);
     }
 
     function playCorrectSound() {
@@ -443,21 +230,16 @@
     function playWrongSound() {
         if (!sfxEnabled || !audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        const notes = [440, 349.23];
-        notes.forEach((freq, idx) => {
-            setTimeout(() => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = freq;
-                osc.type = 'sawtooth';
-                gain.gain.value = 0.15;
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
-                osc.stop(audioCtx.currentTime + 0.25);
-            }, idx * 120);
-        });
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 440;
+        osc.type = 'sawtooth';
+        gain.gain.value = 0.15;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25);
+        osc.stop(audioCtx.currentTime + 0.25);
     }
 
     function playMismatchSound() {
@@ -495,18 +277,18 @@
         });
     }
 
-    // ==================== ИСПРАВЛЕННЫЕ ДАННЫЕ ПАР ====================
+    // ==================== ДАННЫЕ ПАР С УСЛОЖНЁННЫМИ ВОПРОСАМИ ====================
     const PAIRS_DATA = [
-        { trans: "[з'има]", word: "ЗИМА", bonusQuestion: "Какое слово поможет проверить безударную И в слове ЗИМА?", bonusOptions: ["зима", "зИмы", "зимний"], correct: 1 },
-        { trans: "[маркоф']", word: "МОРКОВЬ", bonusQuestion: "Какая буква пропущена в слове М_РКОВЬ?", bonusOptions: ["А", "О", "Е"], correct: 1 },
-        { trans: "[палажыт']", word: "ПОЛОЖИТЬ", bonusQuestion: "В корне -лож- пишется буква:", bonusOptions: ["А", "О", "И"], correct: 1 },
-        { trans: "[с'эрцэ]", word: "СЕРДЦЕ", bonusQuestion: "Какая буква в слове СЕРДЦЕ не произносится?", bonusOptions: ["С", "Р", "Д"], correct: 2 },
-        { trans: "[зуп]", word: "ЗУБ", bonusQuestion: "Как правильно проверить букву Б в слове ЗУБ?", bonusOptions: ["зубы", "зубной", "зубик"], correct: 0 },
-        { trans: "[й'аблака]", word: "ЯБЛОКО", bonusQuestion: "Сколько звуков в слове ЯБЛОКО?", bonusOptions: ["5", "6", "7"], correct: 2 },
-        { trans: "[раскас]", word: "РАССКАЗ", bonusQuestion: "В слове РАССКАЗ приставка пишется:", bonusOptions: ["РАЗ-", "РАС-", "РА-"], correct: 1 },
-        { trans: "[пишэш]", word: "ПИШЕШЬ", bonusQuestion: "В слове ПИШЕШЬ мягкий знак:", bonusOptions: ["нужен", "не нужен"], correct: 0 },
-        { trans: "[цыган]", word: "ЦЫГАН", bonusQuestion: "После Ц в слове Ц_ГАН пишется буква:", bonusOptions: ["И", "Ы", "Е"], correct: 1 },
-        { trans: "[абй'экт]", word: "ОБЪЕКТ", bonusQuestion: "В слове ОБ_ЕКТ пишется:", bonusOptions: ["Ъ", "Ь"], correct: 0 }
+        { trans: "[з'има]", word: "ЗИМА", bonusQuestion: "Какой звук слышится в корне слова ЗИМА?", bonusOptions: ["[а]", "[и]", "[ы]"], correct: 1 },
+        { trans: "[маркоф']", word: "МОРКОВЬ", bonusQuestion: "Какая орфограмма в слове МОРКОВЬ?", bonusOptions: ["Непроизносимая согласная", "Безударная гласная О (словарное слово)", "Мягкий знак после шипящей"], correct: 1 },
+        { trans: "[палажыт']", word: "ПОЛОЖИТЬ", bonusQuestion: "В корне -лож- пишется буква О, потому что...", bonusOptions: ["После Ж пишем О", "После Ж пишем А", "Это словарное слово"], correct: 0 },
+        { trans: "[с'эрцэ]", word: "СЕРДЦЕ", bonusQuestion: "Какая буква в слове СЕРДЦЕ не произносится, но пишется?", bonusOptions: ["С", "Р", "Д"], correct: 2 },
+        { trans: "[зуп]", word: "ЗУБ", bonusQuestion: "Какой закон фонетики действует в слове ЗУБ?", bonusOptions: ["Оглушение звонкого согласного на конце", "Смягчение согласного", "Упрощение групп согласных"], correct: 0 },
+        { trans: "[й'аблака]", word: "ЯБЛОКО", bonusQuestion: "Сколько звуков даёт буква Я в слове ЯБЛОКО?", bonusOptions: ["Один звук [а]", "Два звука [й'а]", "Три звука"], correct: 1 },
+        { trans: "[раскас]", word: "РАССКАЗ", bonusQuestion: "Почему в слове РАССКАЗ пишется две буквы С?", bonusOptions: ["Приставка рас- + корень -сказ-", "Это словарное слово", "Суффикс -с-"], correct: 0 },
+        { trans: "[пишэш]", word: "ПИШЕШЬ", bonusQuestion: "Зачем нужен мягкий знак в слове ПИШЕШЬ?", bonusOptions: ["Обозначает мягкость Ш", "Показатель глагола 2 лица единственного числа", "Разделительный Ь"], correct: 1 },
+        { trans: "[цыган]", word: "ЦЫГАН", bonusQuestion: "Почему в слове ЦЫГАН пишется Ы, а не И?", bonusOptions: ["Это правило: после Ц всегда Ы", "Это слово-исключение", "Так слышится"], correct: 1 },
+        { trans: "[абй'экт]", word: "ОБЪЕКТ", bonusQuestion: "Что разделяет твёрдый знак в слове ОБЪЕКТ?", bonusOptions: ["Приставку и корень", "Корень и суффикс", "Две приставки"], correct: 0 }
     ];
 
     function buildCardArray() {
@@ -525,6 +307,7 @@
     let currentCards = [], cardElementsMap = new Map(), flippedIndices = [];
     let matchedCount = 0, currentPlayer = 0, scores = [0, 0];
     let waitingForBonus = false, pendingPair = null, gameLocked = false;
+    let gameEnded = false;
 
     const gridEl = document.getElementById("cardsGrid");
     const scoreSpan = document.getElementById("scoreValue");
@@ -534,23 +317,85 @@
     const bonusTitle = document.getElementById("bonusTitle");
     const bonusQuestion = document.getElementById("bonusQuestion");
     const bonusOptionsDiv = document.getElementById("bonusOptions");
+    const gameOverDiv = document.getElementById("gameOverMessage");
 
     function updateUI() {
         scoreSpan.innerText = `${scores[0]} : ${scores[1]}`;
-        turnSpan.innerText = currentPlayer === 0 ? "Игрок 1" : "Игрок 2";
+        if (!gameEnded) {
+            turnSpan.innerText = currentPlayer === 0 ? "Игрок 1" : (isTwoPlayerMode ? "Игрок 2" : "Компьютер");
+        }
     }
 
     function showMessage(msg, isError = false) {
+        if (gameEnded) return;
         msgBox.innerHTML = isError ? `⚠️ ${msg}` : `💡 ${msg}`;
         setTimeout(() => {
-            if (!waitingForBonus) msgBox.innerHTML = "🎲 Игра продолжается";
-        }, 1800);
+            if (!waitingForBonus && !gameEnded) msgBox.innerHTML = "🎲 Игра продолжается";
+        }, 2000);
+    }
+
+    function endGame() {
+        gameEnded = true;
+        gameLocked = true;
+        const winner = scores[0] > scores[1] ? "Игрок 1" : (scores[1] > scores[0] ? (isTwoPlayerMode ? "Игрок 2" : "Компьютер") : "Ничья");
+        gameOverDiv.classList.remove("hidden");
+        gameOverDiv.innerHTML = `🏆 ИГРА ОКОНЧЕНА! Победитель: ${winner} 🏆<br>🎉 Нажмите «Новая игра», чтобы сыграть ещё раз! 🎉`;
+        showMessage(`Игра окончена! Победитель: ${winner}`);
+        turnSpan.innerText = gameEnded ? "Игра окончена" : turnSpan.innerText;
     }
 
     function closeBonus() {
         bonusContainer.classList.add("hidden");
         waitingForBonus = false;
         pendingPair = null;
+        if (!gameEnded && !isTwoPlayerMode && currentPlayer === 1 && !gameLocked) {
+            if (computerTimeout) clearTimeout(computerTimeout);
+            computerTimeout = setTimeout(() => computerMove(), 800);
+        }
+    }
+
+    function afterCorrectBonus(cardA, cardB) {
+        cardA.matched = true; cardB.matched = true;
+        const elA = cardElementsMap.get(cardA.uniqueId);
+        const elB = cardElementsMap.get(cardB.uniqueId);
+        if (elA) { elA.classList.add("matched"); elA.classList.remove("flipped"); elA.innerText = ""; }
+        if (elB) { elB.classList.add("matched"); elB.classList.remove("flipped"); elB.innerText = ""; }
+        scores[currentPlayer] += 1;
+        matchedCount++;
+        updateUI();
+        showMessage(`✅ +1 очко! ${currentPlayer === 0 ? "Игрок 1" : (isTwoPlayerMode ? "Игрок 2" : "Компьютер")} забирает пару и ходит ещё раз!`);
+        flippedIndices = [];
+        closeBonus();
+        gameLocked = false;
+        
+        if (matchedCount === PAIRS_DATA.length) {
+            playVictorySound();
+            endGame();
+        }
+    }
+
+    function afterWrongBonus(cardA, cardB) {
+        showMessage(`❌ Неправильно! Ход переходит.`, true);
+        const idxA = currentCards.findIndex(c => c.uniqueId === cardA.uniqueId);
+        const idxB = currentCards.findIndex(c => c.uniqueId === cardB.uniqueId);
+        if (idxA !== -1) {
+            const el = cardElementsMap.get(cardA.uniqueId);
+            if (el) el.classList.remove("flipped");
+        }
+        if (idxB !== -1) {
+            const el = cardElementsMap.get(cardB.uniqueId);
+            if (el) el.classList.remove("flipped");
+        }
+        flippedIndices = [];
+        currentPlayer = currentPlayer === 0 ? 1 : 0;
+        updateUI();
+        closeBonus();
+        gameLocked = false;
+        
+        if (matchedCount === PAIRS_DATA.length) {
+            playVictorySound();
+            endGame();
+        }
     }
 
     function showBonus(pairId, cardA, cardB) {
@@ -565,42 +410,10 @@
             btn.onclick = () => {
                 if (idx === pair.correct) {
                     playCorrectSound();
-                    cardA.matched = true; cardB.matched = true;
-                    const elA = cardElementsMap.get(cardA.uniqueId);
-                    const elB = cardElementsMap.get(cardB.uniqueId);
-                    if (elA) { elA.classList.add("matched"); elA.classList.remove("flipped"); }
-                    if (elB) { elB.classList.add("matched"); elB.classList.remove("flipped"); }
-                    scores[currentPlayer] += 1;
-                    matchedCount++;
-                    updateUI();
-                    showMessage(`✅ +1 очко! ${currentPlayer === 0 ? "Игрок 1" : "Игрок 2"} забирает пару и ходит ещё раз!`);
-                    flippedIndices = [];
-                    closeBonus();
-                    gameLocked = false;
-                    if (matchedCount === PAIRS_DATA.length) {
-                        playVictorySound();
-                        const winner = scores[0] > scores[1] ? "Игрок 1" : (scores[1] > scores[0] ? "Игрок 2" : "Ничья");
-                        showMessage(`🏆 ИГРА ОКОНЧЕНА! Победитель: ${winner} 🏆`);
-                        gameLocked = true;
-                    }
+                    afterCorrectBonus(cardA, cardB);
                 } else {
                     playWrongSound();
-                    showMessage(`❌ Неправильно! Правильный ответ: ${pair.bonusOptions[pair.correct]}. Ход переходит.`, true);
-                    const idxA = currentCards.findIndex(c => c.uniqueId === cardA.uniqueId);
-                    const idxB = currentCards.findIndex(c => c.uniqueId === cardB.uniqueId);
-                    if (idxA !== -1) {
-                        const el = cardElementsMap.get(cardA.uniqueId);
-                        if (el) el.classList.remove("flipped");
-                    }
-                    if (idxB !== -1) {
-                        const el = cardElementsMap.get(cardB.uniqueId);
-                        if (el) el.classList.remove("flipped");
-                    }
-                    flippedIndices = [];
-                    currentPlayer = currentPlayer === 0 ? 1 : 0;
-                    updateUI();
-                    closeBonus();
-                    gameLocked = false;
+                    afterWrongBonus(cardA, cardB);
                 }
             };
             bonusOptionsDiv.appendChild(btn);
@@ -612,13 +425,12 @@
     }
 
     function handleCardClick(idx) {
-        if (gameLocked || waitingForBonus) return;
+        if (gameLocked || waitingForBonus || gameEnded) return;
         const card = currentCards[idx];
         if (!card || card.matched) return;
         if (flippedIndices.includes(idx)) return;
         if (flippedIndices.length >= 2) return;
 
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         playFlipSound();
 
         const el = cardElementsMap.get(card.uniqueId);
@@ -644,9 +456,28 @@
                     currentPlayer = currentPlayer === 0 ? 1 : 0;
                     updateUI();
                     gameLocked = false;
+                    if (!isTwoPlayerMode && currentPlayer === 1 && !gameEnded && !waitingForBonus) {
+                        if (computerTimeout) clearTimeout(computerTimeout);
+                        computerTimeout = setTimeout(() => computerMove(), 600);
+                    }
                 }, 1000);
             }
         }
+    }
+
+    function computerMove() {
+        if (gameLocked || waitingForBonus || gameEnded) return;
+        if (currentPlayer !== 1) return;
+        
+        const availableIndices = currentCards.reduce((arr, card, idx) => {
+            if (!card.matched && !flippedIndices.includes(idx)) arr.push(idx);
+            return arr;
+        }, []);
+        
+        if (availableIndices.length === 0) return;
+        
+        const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        setTimeout(() => handleCardClick(randomIndex), 300);
     }
 
     function renderBoard() {
@@ -664,6 +495,7 @@
     }
 
     function resetGame() {
+        if (computerTimeout) clearTimeout(computerTimeout);
         stopBackgroundMusic();
         currentCards = buildCardArray();
         flippedIndices = [];
@@ -672,12 +504,21 @@
         scores = [0, 0];
         waitingForBonus = false;
         gameLocked = false;
+        gameEnded = false;
         pendingPair = null;
         closeBonus();
+        gameOverDiv.classList.add("hidden");
         updateUI();
         renderBoard();
-        showMessage("Новая игра! Начинает Игрок 1");
+        showMessage("🎮 Новая игра! Начинает Игрок 1");
         if (musicEnabled) startBackgroundMusic();
+    }
+
+    function setMode(twoPlayer) {
+        isTwoPlayerMode = twoPlayer;
+        document.getElementById("mode2pBtn").classList.toggle("active", twoPlayer);
+        document.getElementById("mode1pBtn").classList.toggle("active", !twoPlayer);
+        resetGame();
     }
 
     document.getElementById("startGameBtn").onclick = () => {
@@ -686,7 +527,8 @@
         initAudio();
         resetGame();
     };
-
+    document.getElementById("mode2pBtn").onclick = () => setMode(true);
+    document.getElementById("mode1pBtn").onclick = () => setMode(false);
     document.getElementById("toggleMusicBtn").onclick = () => {
         musicEnabled = !musicEnabled;
         document.getElementById("toggleMusicBtn").innerHTML = musicEnabled ? "🎵 Музыка: Вкл" : "🎵 Музыка: Выкл";

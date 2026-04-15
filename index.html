@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>НейроМем: Звук и Буква — исправленная версия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>НейроМем: Звук и Буква — VK Mini App</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,6 +21,7 @@
             padding: 20px;
         }
 
+        /* Модальное окно инструкции */
         .modal {
             position: fixed;
             top: 0;
@@ -63,10 +64,13 @@
         .sub { text-align: center; color: #2c5282; margin-bottom: 22px; font-style: italic; }
 
         .mode-controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
-        .mode-btn { background: #4a5568; color: white; border: none; padding: 6px 20px; border-radius: 40px; font-size: 0.9rem; cursor: pointer; }
+        .mode-btn { background: #4a5568; color: white; border: none; padding: 6px 20px; border-radius: 40px; font-size: 0.9rem; cursor: pointer; transition: 0.1s; }
         .mode-btn.active { background: #2c5282; box-shadow: 0 0 0 2px #facc15; }
+        .mode-btn:active { transform: scale(0.95); }
+
         .audio-controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
         .audio-btn { background: #2c5282; color: white; border: none; padding: 6px 16px; border-radius: 40px; font-size: 0.9rem; cursor: pointer; }
+        .audio-btn:active { transform: scale(0.95); }
 
         .stats { display: flex; justify-content: space-between; background: #e2e8f0; padding: 12px 20px; border-radius: 60px; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; align-items: center; }
         .score-box, .turn-box, .message-box { background: white; padding: 6px 20px; border-radius: 40px; font-weight: bold; }
@@ -82,24 +86,28 @@
         .neuro-bonus-area { background: #e9ecef; border-radius: 32px; padding: 18px 20px; margin: 15px 0 10px; text-align: center; border-left: 8px solid #facc15; }
         .bonus-card { background: #1e293b; color: white; padding: 18px; border-radius: 28px; max-width: 550px; margin: 0 auto; }
         .bonus-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 12px; }
-        .bonus-question { font-size: 1.1rem; margin: 12px 0; line-height: 1.4; }
-        .bonus-options { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 15px 0; }
-        .bonus-option { background: #334155; border: none; padding: 10px 20px; border-radius: 48px; font-weight: bold; font-size: 1rem; cursor: pointer; color: white; transition: 0.1s; }
+        .bonus-question { font-size: 1rem; margin: 12px 0; line-height: 1.4; }
+        .bonus-options { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 15px 0; }
+        .bonus-option { background: #334155; border: none; padding: 10px 18px; border-radius: 48px; font-weight: bold; font-size: 0.95rem; cursor: pointer; color: white; transition: 0.1s; }
         .bonus-option:hover { background: #facc15; color: #1e293b; }
         .btn-reset { background: #2c5282; color: white; margin-top: 12px; width: 100%; padding: 14px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 48px; cursor: pointer; }
         .hidden { display: none; }
         footer { text-align: center; font-size: 0.7rem; margin-top: 18px; color: #fef9e8; }
-        .game-over-message { text-align: center; font-size: 1.3rem; font-weight: bold; color: #2c5282; margin-top: 15px; padding: 10px; background: #e2e8f0; border-radius: 40px; }
+        .game-over-message { text-align: center; font-size: 1.2rem; font-weight: bold; color: #2c5282; margin-top: 15px; padding: 12px; background: #e2e8f0; border-radius: 40px; }
 
         @media (max-width: 700px) {
             .cards-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
             .card { font-size: 1rem; }
             .card.flipped { font-size: 1.1rem; }
+            h1 { font-size: 1.5rem; }
+            .mode-controls { flex-direction: column; align-items: center; }
+            .bonus-title { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
+<!-- ИНСТРУКЦИЯ ПЕРЕД ЗАПУСКОМ -->
 <div id="instructionModal" class="modal">
     <div class="modal-content">
         <h2>🧠 НейроМем: Звук и Буква</h2>
@@ -119,13 +127,18 @@
             ✅ Верно → +1 очко, пара исчезает, <strong>ходишь ещё раз</strong>.<br>
             ❌ Ошибка → пара закрывается, ход переходит.
         </div>
+        <h3>🔊 Звуки и музыка</h3>
+        <ul>
+            <li>🎵 Фоновая музыка (можно отключить кнопкой)</li>
+            <li>🔊 Звуки: переворот карточки, правильный/неправильный ответ, победа</li>
+        </ul>
         <button class="btn-start" id="startGameBtn">🚀 Начать игру!</button>
     </div>
 </div>
 
 <div class="game-container" style="display: none;" id="gameContainer">
     <div class="game-panel">
-        <h1>🧠 НейроМем: Звук и Буква <span>исправленная версия</span></h1>
+        <h1>🧠 НейроМем: Звук и Буква <span>VK Mini App</span></h1>
         <div class="sub">🎯 найди пару [транскрипция] → БУКВЫ + ответь на вопрос!</div>
 
         <div class="mode-controls">
@@ -161,9 +174,30 @@
 </div>
 
 <script>
-    // Режим игры: true = 2 игрока, false = 1 игрок (против компа)
-    let isTwoPlayerMode = true;
-    let computerTimeout = null;
+    // ==================== VK BRIDGE (ОБЯЗАТЕЛЬНО ДЛЯ МОДЕРАЦИИ) ====================
+    // Функция определения запуска внутри VK
+    function isRunningInVK() {
+        return window.location !== window.parent.location;
+    }
+
+    // Инициализация VK Bridge
+    if (typeof vkBridge !== 'undefined') {
+        vkBridge.send('VKWebAppInit')
+            .then(() => {
+                console.log('✅ VK Bridge инициализирован успешно');
+                const msgBox = document.getElementById('messageBox');
+                if (msgBox) msgBox.innerHTML = '✅ VK Bridge подключён! Игра готова';
+            })
+            .catch((error) => {
+                console.error('❌ Ошибка инициализации VK Bridge:', error);
+            });
+        
+        vkBridge.subscribe((event) => {
+            console.log('📡 Событие от VK Bridge:', event.detail);
+        });
+    } else {
+        console.log('Игра запущена не в VK Mini App (или VK Bridge не загружен)');
+    }
 
     // ==================== МУЗЫКА И ЗВУКИ ====================
     let musicEnabled = true;
@@ -185,11 +219,14 @@
             bgMusic.loop = true;
             bgMusic.volume = 0.2;
         }
-        bgMusic.play().catch(e => console.log("Музыка заблокирована"));
+        bgMusic.play().catch(e => console.log("Музыка заблокирована браузером"));
     }
 
     function stopBackgroundMusic() {
-        if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+        if (bgMusic) {
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+        }
     }
 
     function playFlipSound() {
@@ -304,6 +341,9 @@
         return cards;
     }
 
+    // ==================== СОСТОЯНИЕ ИГРЫ ====================
+    let isTwoPlayerMode = true;
+    let computerTimeout = null;
     let currentCards = [], cardElementsMap = new Map(), flippedIndices = [];
     let matchedCount = 0, currentPlayer = 0, scores = [0, 0];
     let waitingForBonus = false, pendingPair = null, gameLocked = false;
@@ -341,7 +381,7 @@
         gameOverDiv.classList.remove("hidden");
         gameOverDiv.innerHTML = `🏆 ИГРА ОКОНЧЕНА! Победитель: ${winner} 🏆<br>🎉 Нажмите «Новая игра», чтобы сыграть ещё раз! 🎉`;
         showMessage(`Игра окончена! Победитель: ${winner}`);
-        turnSpan.innerText = gameEnded ? "Игра окончена" : turnSpan.innerText;
+        turnSpan.innerText = "Игра окончена";
     }
 
     function closeBonus() {
@@ -521,6 +561,7 @@
         resetGame();
     }
 
+    // ==================== ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ====================
     document.getElementById("startGameBtn").onclick = () => {
         document.getElementById("instructionModal").style.display = "none";
         document.getElementById("gameContainer").style.display = "block";
@@ -540,6 +581,14 @@
         document.getElementById("toggleSfxBtn").innerHTML = sfxEnabled ? "🔊 Эффекты: Вкл" : "🔇 Эффекты: Выкл";
     };
     document.getElementById("resetGame").onclick = () => resetGame();
+
+    // Активация звука при первом касании (для мобильных VK)
+    document.body.addEventListener('touchstart', () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    });
 </script>
-</body>
-</html>
+
+<!-- VK BRIDGE (ОБЯЗАТЕЛЬНО ПОДКЛЮЧАТЬ) -->
+<script src="https://unpkg.com
